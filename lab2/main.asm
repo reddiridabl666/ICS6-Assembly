@@ -8,12 +8,12 @@ BITS 64;
 %define WRITE 1
 %define EXIT 60
 
-; %define ZERO 0x30
-; %define NINE 0x39
-
 section .data
-    prompt db "Enter numbers a, b, y:", 10
+    prompt db "Enter numbers a, b, y each in its own line:", 10
     prompt_len equ $-prompt
+
+    err_msg db "Error: make sure that each line is a single number",10
+    err_len equ $-err_msg
 
     buff times 8 db 0 
 
@@ -45,6 +45,8 @@ _start:
     syscall
 
     call StrToInt64
+    cmp rbx, 0
+    jne error
     mov [a], rax
 
     mov rax, READ
@@ -52,6 +54,8 @@ _start:
     syscall
 
     call StrToInt64
+    cmp rbx, 0
+    jne error
     mov [b], rax
 
     mov rax, READ
@@ -59,6 +63,8 @@ _start:
     syscall
 
     call StrToInt64
+    cmp rbx, 0
+    jne error
     mov [y], rax
 
     mov rax, [a]
@@ -86,6 +92,15 @@ _start:
     mov rdi, STDOUT   
     syscall
 
+exit:
     xor rdi, rdi
     mov rax, EXIT
     syscall
+
+error:
+    mov rax, WRITE
+    mov rdi, STDOUT
+    mov rsi, err_msg
+    mov rdx, err_len
+    syscall
+    jmp exit

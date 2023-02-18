@@ -12,6 +12,9 @@ section .data
     prompt db "Input two numbers, each on its own line",10
     prompt_len equ $-prompt
 
+    err_msg db "Error: make sure that each line is a single number",10
+    err_len equ $-err_msg
+
     input times 8 db 0
     input_len equ $-input
 
@@ -37,6 +40,8 @@ _start:
     syscall
 
     call StrToInt64
+    cmp rbx, 0
+    jne error
     mov [a], rax
 
     mov rax, READ
@@ -44,6 +49,8 @@ _start:
     syscall
 
     call StrToInt64
+    cmp rbx, 0
+    jne error
     mov [c], rax
 
     mov rax, [a]
@@ -81,6 +88,16 @@ return:
     mov rdi, STDOUT
     syscall
 
+    jmp exit
+
+error:
+    mov rax, WRITE
+    mov rdi, STDOUT
+    mov rsi, err_msg
+    mov rdx, err_len
+    syscall
+
+exit:
     xor rdi, rdi
     mov rax, EXIT
     syscall
