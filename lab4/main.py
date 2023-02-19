@@ -6,6 +6,8 @@ def max_upper(matrix):
                 max_elem = elem
     return max_elem
 
+print("Enter 5*5 matrix:")
+
 matrix = []
 
 for i in range(5):

@@ -124,7 +124,7 @@ inner_loop:
     cmp rbx, rcx
     jle skip
 
-    cmp [matrix + rdx * 8], rax 
+    cmp dword [matrix + rdx * 8], eax 
     jle skip
 
     mov rax, [matrix + rdx * 8]
