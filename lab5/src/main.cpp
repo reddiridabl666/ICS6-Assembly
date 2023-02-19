@@ -5,7 +5,9 @@
 static constexpr size_t kMaxLength = 255;
 static constexpr std::string_view kInvalidInput = "Invalid input";
 
-extern "C" void swap_words(const char* input, size_t first, size_t second);
+extern "C" {
+    const char* swap_words(const char* input, size_t size, size_t first, size_t second);
+}
 
 int main() {
     std::cout << "Input text with <= 255 characters" << std::endl;
@@ -32,8 +34,9 @@ int main() {
         std::cout << "Input should be <= 255 characters long" << std::endl;
         return -1;
     }
-
-    swap_words(input.c_str(), first, second);
+    
+    input += '\n';
+    /* std::cout << */ swap_words(input.c_str(), input.size(), first, second) /* << std::endl */;
 
     return 0;
 }
