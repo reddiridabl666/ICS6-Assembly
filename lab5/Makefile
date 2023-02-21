@@ -13,10 +13,10 @@ ${ASM_MODULE}: ${SRC_DIR}/${ASM_MODULE}.asm
 	nasm -f elf64 ${SRC_DIR}/${ASM_MODULE}.asm -o ${BUILD_DIR}/${ASM_MODULE}.o
 
 ${TARGET}: ${SRC_DIR}/${TARGET}.cpp
-	g++ -c ${SRC_DIR}/${TARGET}.cpp -o ${BUILD_DIR}/${TARGET}.o
+	g++ -std=c++20 -c ${SRC_DIR}/${TARGET}.cpp -o ${BUILD_DIR}/${TARGET}.o
 
 run: build
 	./${BUILD_DIR}/${TARGET}.out
 
-debug: ${TARGET}
+debug: build
 	edb --run ${BUILD_DIR}/${TARGET}.out
