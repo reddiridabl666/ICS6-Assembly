@@ -31,6 +31,14 @@ swap_words:
     mov [input_start], rdi
     mov [input_len], rsi
 
+    cmp rdx, rcx
+    jle less
+    xchg rdx, rcx
+
+less:
+    cmp rdx, 0
+    jle error
+
     mov [first], rdx
     mov [second], rcx
 
@@ -88,6 +96,7 @@ process_word:
 
     pop rsi
     pop rcx
+    mov rax, rsi
     ret
 
 form_result:
@@ -110,11 +119,10 @@ result_loop:
 
     cmp byte[rsi], ' '
     jne next
-    
-    movsb
     inc rdx
+    movsb
 
-next:   
+next:
     dec rcx
     jmp result_loop
 
@@ -126,7 +134,6 @@ add_first:
     call add_word
     jmp result_loop
     
-
 add_second:
     mov rax, [first_len]
     mov rbx, second_word
@@ -149,6 +156,7 @@ add_word:
     pop rsi
     pop rcx
 
+    movsb
     inc rdx
     ret
 

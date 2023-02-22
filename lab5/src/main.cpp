@@ -17,7 +17,7 @@ std::vector<size_t> get_numbers(const std::string& str) {
     bool found = false;
 
     for (char c : str) {
-        if (c > '0' && c < '9') {
+        if (c >= '0' && c <= '9') {
             num = num * 10 + (c - '0');
             found = true;
             continue;
@@ -30,7 +30,7 @@ std::vector<size_t> get_numbers(const std::string& str) {
             continue;
         }
 
-        throw std::runtime_error("Invalid input");
+        throw std::runtime_error("You should input 2 positive numbers seperated by a space");
     }
 
     if (found) {
@@ -66,7 +66,7 @@ int main() {
             numbers = get_numbers(input_numbers);
         } catch(std::runtime_error& e) {
             std::cout << e.what() << std::endl;
-            return -1;
+            continue;
         }
 
         if (numbers.size() != 2) {
