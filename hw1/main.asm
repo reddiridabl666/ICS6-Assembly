@@ -47,11 +47,15 @@ main_loop:
     jl end
 
     cmp byte[rsi], ' '
+    je next_word
+
+    cmp byte[rsi], 10
     jne next
 
-    cmp rax, NEEDED
-    xor rdx, rdx
-    jl main_loop
+next_word:
+    cmp rdx, NEEDED
+    mov rdx, 0
+    jle main_loop
     inc rax
 
 next:
