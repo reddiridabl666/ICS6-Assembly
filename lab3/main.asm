@@ -21,83 +21,83 @@ section .data
     output times 8 db 0
 
 section .bss
-    a resq 1
-    c resq 1
+    a resd 1
+    c resd 1
 
 section .text
 global _start
 _start:
-    mov rax, WRITE
-    mov rdi, STDOUT
-    mov rsi, prompt
-    mov rdx, prompt_len
+    mov eax, WRITE
+    mov edi, STDOUT
+    mov esi, prompt
+    mov edx, prompt_len
     syscall
 
-    mov rax, READ
-    mov rdi, STDIN
-    mov rsi, input
-    mov rdx, input_len
-    syscall
-
-    call StrToInt64
-    cmp rbx, 0
-    jne error
-    mov [a], rax
-
-    mov rax, READ
-    mov rdx, input_len
+    mov eax, READ
+    mov edi, STDIN
+    mov esi, input
+    mov edx, input_len
     syscall
 
     call StrToInt64
-    cmp rbx, 0
+    cmp ebx, 0
     jne error
-    mov [c], rax
+    mov [a], eax
 
-    mov rax, [a]
-    cqo
-    idiv qword [c]
+    mov eax, READ
+    mov edx, input_len
+    syscall
 
-    cmp rax, 2
+    call StrToInt64
+    cmp ebx, 0
+    jne error
+    mov [c], eax
+
+    mov eax, [a]
+    cdq
+    idiv dword [c]
+
+    cmp eax, 2
     jg true
     jl false
 
-    cmp rdx, 0
+    cmp edx, 0
     jg true
     jmp false
 
 true:
-    mov rax, [a]
-    sub rax, [c]
-    mul rax
-    add rax, [c]
+    mov eax, [a]
+    sub eax, [c]
+    imul eax
+    add eax, [c]
 
     jmp return
 
 false:
-    mov rax, [c]
-    mov rdx, 2
-    mul rdx
-    add rax, [a]
+    mov eax, [c]
+    mov edx, 2
+    imul edx
+    add eax, [a]
 
 return:
-    mov rsi, output
+    mov esi, output
     call IntToStr64
 
-    mov rdx, rax
-    mov rax, WRITE
-    mov rdi, STDOUT
+    mov edx, eax
+    mov eax, WRITE
+    mov edi, STDOUT
     syscall
 
     jmp exit
 
 error:
-    mov rax, WRITE
-    mov rdi, STDOUT
-    mov rsi, err_msg
-    mov rdx, err_len
+    mov eax, WRITE
+    mov edi, STDOUT
+    mov esi, err_msg
+    mov edx, err_len
     syscall
 
 exit:
-    xor rdi, rdi
-    mov rax, EXIT
+    xor edi, edi
+    mov eax, EXIT
     syscall

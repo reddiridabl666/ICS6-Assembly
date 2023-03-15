@@ -47,12 +47,19 @@ main_loop:
     jl end
 
     cmp byte[rsi], ' '
-    jne next
+    je update
 
-    cmp rax, NEEDED
-    xor rdx, rdx
-    jl main_loop
+    cmp byte[rsi], 10
+    je update
+
+    jmp next
+
+update:
+    cmp rdx, NEEDED
+    mov rdx, 0
+    jle main_loop
     inc rax
+    jmp main_loop
 
 next:
     cmp byte[rsi], 'A'

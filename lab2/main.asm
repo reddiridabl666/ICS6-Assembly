@@ -68,14 +68,14 @@ _start:
     mov [y], rax
 
     mov rax, [a]
-    mul qword [a]
+    imul qword [a]
     sub rax, [b]
 
     mov rbx, [y]
     add rbx, [a]
 
     cqo
-    div rbx
+    idiv rbx
     mov [f], rax
 
     mov rax, [a]
