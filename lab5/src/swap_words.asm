@@ -26,6 +26,7 @@ section .bss
 
 section .text
 global swap_words
+extern print_exchanged
 
 swap_words:
     mov [input_start], rdi
@@ -161,8 +162,18 @@ add_word:
     ret
 
 end:
-    mov rax, [input_len]
-    mov byte[output + rax - 1], 0
+    ; mov rbx, [first_len]
+    ; mov byte[first_word + rbx], 0
+
+    ; mov rbx, [second_len]
+    ; mov byte[second_word + rbx], 0
+
+    mov rdi, first_word
+    mov rsi, second_word
+    call print_exchanged
+
+    ; mov rax, [input_len]
+    ; mov byte[output + rax - 1], 0
     mov rax, output
     ret
 
