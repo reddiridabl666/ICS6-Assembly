@@ -12,4 +12,3 @@ for word in line:
     a_count = 0
 
 print(res)
-    

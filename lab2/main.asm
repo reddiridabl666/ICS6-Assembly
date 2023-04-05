@@ -12,6 +12,9 @@ section .data
     prompt db "Enter numbers a, b, y each in its own line:", 10
     prompt_len equ $-prompt
 
+    zero_error db "Zero division error", 10
+    zero_error_len equ $-zero_error
+
     err_msg db "Error: make sure that each line is a single number",10
     err_len equ $-err_msg
 
@@ -32,75 +35,86 @@ section .text
 global _start
 
 _start:
-    mov rax, WRITE
-    mov rdi, STDOUT
-    mov rsi, prompt
-    mov rdx, prompt_len
+    mov eax, WRITE
+    mov edi, STDOUT
+    mov esi, prompt
+    mov edx, prompt_len
     syscall
 
-    mov rax, READ
-    mov rdi, STDIN
-    mov rsi, input
-    mov rdx, input_len
-    syscall
-
-    call StrToInt64
-    cmp rbx, 0
-    jne error
-    mov [a], rax
-
-    mov rax, READ
-    mov rdx, input_len
+    mov eax, READ
+    mov edi, STDIN
+    mov esi, input
+    mov edx, input_len
     syscall
 
     call StrToInt64
-    cmp rbx, 0
+    cmp ebx, 0
     jne error
-    mov [b], rax
+    mov [a], eax
 
-    mov rax, READ
-    mov rdx, input_len
+    mov eax, READ
+    mov edx, input_len
     syscall
 
     call StrToInt64
-    cmp rbx, 0
+    cmp ebx, 0
     jne error
-    mov [y], rax
+    mov [b], eax
 
-    mov rax, [a]
+    mov eax, READ
+    mov edx, input_len
+    syscall
+
+    call StrToInt64
+    cmp ebx, 0
+    jne error
+    mov [y], eax
+
+    mov eax, [a]
     imul qword [a]
-    sub rax, [b]
+    sub eax, [b]
 
-    mov rbx, [y]
-    add rbx, [a]
+    mov ebx, [y]
+    add ebx, [a]
 
+    cmp ebx, 0
+    je zero
+    
     cqo
-    idiv rbx
-    mov [f], rax
+    idiv ebx
+    mov [f], eax
 
-    mov rax, [a]
-    dec rax
-    mul rax
+    mov eax, [a]
+    dec eax
+    mul eax
 
-    add rax, [f]
+    add eax, [f]
 
-    mov rsi, buff
+    mov esi, buff
     call IntToStr64
 
-    mov rdx, rax
-    mov rax, WRITE
-    mov rdi, STDOUT   
+    mov edx, eax
+    mov eax, WRITE
+    mov edi, STDOUT   
     syscall
 
 exit:
-    xor rdi, rdi
-    mov rax, EXIT
+    xor edi, edi
+    mov eax, EXIT
     syscall
 
 error:
-    mov rax, WRITE
-    mov rdi, STDOUT
-    mov rsi, err_msg
-    mov rdx, err_len
+    mov eax, WRITE
+    mov edi, STDOUT
+    mov esi, err_msg
+    mov edx, err_len
+    syscall
+    jmp exit
+
+zero:
+    mov eax, WRITE
+    mov edi, STDOUT
+    mov esi, zero_error
+    mov edx, zero_error_len
     syscall
     jmp exit

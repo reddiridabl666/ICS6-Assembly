@@ -42,32 +42,27 @@ _start:
 
 main_loop:
     inc rsi
-    dec rcx
-    cmp rcx, 0
-    jl end
-
     cmp byte[rsi], ' '
     je update
 
     cmp byte[rsi], 10
     je update
 
+    cmp byte[rsi], 'A'
+    jne next
+    inc rdx
     jmp next
 
 update:
     cmp rdx, NEEDED
     mov rdx, 0
-    jle main_loop
+    jle next
     inc rax
-    jmp main_loop
+    jmp next
 
 next:
-    cmp byte[rsi], 'A'
-    jne main_loop
-    inc rdx
-    jmp main_loop
+    loop main_loop
 
-end:
     mov rsi, output
     call IntToStr64
 

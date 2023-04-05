@@ -43,6 +43,15 @@ less:
     mov [first], rdx
     mov [second], rcx
 
+    push rbp
+    mov rbp, rsp
+    push rax
+    push rcx
+    push rsi
+    push rdi
+    push rdx
+    push rbx
+
     mov rcx, [input_len]
     mov rsi, [input_start]
     mov rax, rsi
@@ -162,18 +171,18 @@ add_word:
     ret
 
 end:
-    ; mov rbx, [first_len]
-    ; mov byte[first_word + rbx], 0
-
-    ; mov rbx, [second_len]
-    ; mov byte[second_word + rbx], 0
+    pop rbx
+    pop rdx
+    pop rdi
+    pop rsi
+    pop rcx
+    pop rax
+    pop rbp
 
     mov rdi, first_word
     mov rsi, second_word
     call print_exchanged
 
-    ; mov rax, [input_len]
-    ; mov byte[output + rax - 1], 0
     mov rax, output
     ret
 

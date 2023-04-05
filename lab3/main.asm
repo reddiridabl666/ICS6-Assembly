@@ -12,6 +12,9 @@ section .data
     prompt db "Input two numbers, each on its own line",10
     prompt_len equ $-prompt
 
+    zero_error db "Zero division error", 10
+    zero_error_len equ $-zero_error
+
     err_msg db "Error: make sure that each line is a single number",10
     err_len equ $-err_msg
 
@@ -54,6 +57,10 @@ _start:
     mov [c], eax
 
     mov eax, [a]
+
+    cmp dword[c], 0
+    je zero
+
     cdq
     idiv dword [c]
 
@@ -62,7 +69,7 @@ _start:
     jl false
 
     cmp edx, 0
-    jg true
+    jne true
     jmp false
 
 true:
@@ -101,3 +108,11 @@ exit:
     xor edi, edi
     mov eax, EXIT
     syscall
+
+zero:
+    mov rax, WRITE
+    mov rdi, STDOUT
+    mov rsi, zero_error
+    mov rdx, zero_error_len
+    syscall
+    jmp exit
