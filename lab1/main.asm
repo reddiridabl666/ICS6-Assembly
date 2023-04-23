@@ -21,6 +21,16 @@ section .data              ; сегмент инициализированных
     val2 dd -35
     name db "Леонид Leonid"
 
+    val_25_00 dw 37
+    val_00_25 dw 9472
+    val_00_25_2 dw 0025h
+
+    f1 dw 65535
+    f2 dd 65535
+
+    d1 dw 5
+    d2 dw -5
+
 section .bss               ; сегмент неинициализированных переменных
     InBuf   resb    10            ; буфер для вводимой строки
     lenIn   equ     $-InBuf
@@ -33,6 +43,9 @@ section .bss               ; сегмент неинициализированн
 section .text         ; сегмент кода
 global  _start
 _start:
+    mov ax, [d1]
+    mov ax, [d2]
+
     mov EAX,[A] ; загрузить число A в регистр EAX
     add EAX,5   ; сложить EAX и 5, результат в EAX
     sub EAX,[B] ; вычесть число B, результат в EAX
@@ -50,6 +63,10 @@ _start:
     mov     rsi, InBuf    ; адрес вводимой строки
     mov     rdx, lenIn    ; длина строки
     syscall               ; вызов системной функции
+
+    add word[f1], 1
+    add dword[f2], 1
+
     ; exit
     mov     rax, 60       ; системная функция 60 (exit)
     xor     rdi, rdi      ; return code 0    

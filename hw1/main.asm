@@ -57,6 +57,7 @@ next_word:
     mov rdx, 0
     jle main_loop
     inc rax
+    jmp main_loop
 
 next:
     cmp byte[rsi], 'A'

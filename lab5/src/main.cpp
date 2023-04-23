@@ -70,7 +70,7 @@ int main() {
         }
 
         if (numbers.size() != 2) {
-            std::cout << "You should input 2 numbers seperated by one space" << std::endl;
+            std::cout << "You should input 2 numbers separated by one space" << std::endl;
             continue;
         }
 
