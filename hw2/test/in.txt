@@ -1,0 +1,10 @@
+Case Index of 1, 2: a:=5; 3: Case jj of -6: b23:=3; 1,7: b23:=5 end end;
+adb := 2;
+case a of 1: case b of 2: case c of 3: b := 1 end end end;
+case a of 1: _dds2b := 3; 2, 3: dgdf := 1; end;
+case a of 1: abc := 2 end;
+adb :=
+case a of 1: abc := 2;
+case a of 1: case b of 2: case c of 3: b := 1 end end;
+case a of 1: _dds2b := 3; 2, 3: end;
+конец

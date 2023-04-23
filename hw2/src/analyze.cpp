@@ -4,9 +4,11 @@
 #include <map>
 #include <cctype>
 #include <utility>
+#include <functional>
 #include <iostream>
 #include <iterator>
 #include <set>
+#include <tuple>
 
 #include "analyze.hpp"
 #include "identifiers.hpp"
@@ -14,10 +16,12 @@
 #include "lexem.hpp"
 #include "trim.hpp"
 
-enum class context {
-    NONE,
-    CASE
-};
+namespace context {
+    enum context_t {
+        NONE,
+        CASE,
+    };
+}
 
 namespace state {
     enum state_t {
@@ -40,16 +44,10 @@ namespace state {
     struct with_context {
         state_t state;
         lexem::lexem_t lexem;
-        context ctx;
+        context::context_t ctx;
 
         bool operator<(const with_context& other) const {
-            if (state < other.state) {
-                return true;
-            }
-            if (lexem < other.lexem) {
-                return true;
-            }
-            return ctx < other.ctx;
+            return std::tie(state, lexem, ctx) < std::tie(other.state, other.lexem, other.ctx);
         }
     };
 
@@ -65,28 +63,42 @@ namespace state {
         /* LITERAL */ {ERROR,  ERROR,  ERROR,  ERROR,  EXPR_END, ERROR,  ERROR, ERROR,   ERROR,    ERROR},
         /* EXPR */    {ERROR,  CASE,   ASSIGN, ERROR,  ERROR,    ERROR,  ERROR, ERROR,   ERROR,    ERROR},
         /* EXPR_END*/ {ERROR,  ERROR,  ERROR,  ERROR,  ERROR,    ERROR,  ERROR, ERROR,   CONTEXT,  CONTEXT},
-        /* CASE_NXT*/ {ERROR,  ERROR,  ERROR,  ERROR,  NEXT,     ERROR,  ERROR, ERROR,   CASE_END, ERROR},
+        /* CASE_NXT*/ {ERROR,  ERROR,  ERROR,  ERROR,  NEXT,     ERROR,  ERROR, ERROR,   CONTEXT,  ERROR},
         /* CASE_END*/ {ERROR,  ERROR,  ERROR,  ERROR,  ERROR,    ERROR,  ERROR, ERROR,   ERROR,    START},
     };
 }
 
-static std::map<state::with_context, state::state_t> contextual_table = {
-    {state::with_context{state::EXPR_END, lexem::SEMICOLON, context::NONE}, state::START},
-    {state::with_context{state::EXPR_END, lexem::END,       context::NONE}, state::ERROR},
-    {state::with_context{state::EXPR_END, lexem::SEMICOLON, context::CASE}, state::CASE_NXT},
-    {state::with_context{state::EXPR_END, lexem::END,       context::CASE}, state::CASE_END},
+static size_t nesting_level = 0;
+
+state::state_t nesting() {
+    nesting_level -= 1;
+    if (nesting_level > 0) {
+        return state::CASE_NXT;
+    }
+    return state::CASE_END;
+}
+
+static std::map<state::with_context, std::function<state::state_t()> >contextual_table = {
+    {state::with_context{state::EXPR_END, lexem::SEMICOLON, context::NONE}, [] { return state::START;}},
+    {state::with_context{state::EXPR_END, lexem::END,       context::NONE}, [] { return state::ERROR;}},
+    {state::with_context{state::EXPR_END, lexem::SEMICOLON, context::CASE}, [] { return state::CASE_NXT;}},
+    {state::with_context{state::EXPR_END, lexem::END,       context::CASE}, nesting},
+    {state::with_context{state::CASE_NXT, lexem::END,       context::CASE}, nesting},
 };
 
-context update_context(context old, state::state_t state) {
-    if (state == state::CASE) {
-        return context::CASE;
-    }
+namespace context {
+    context_t update(context_t old, state::state_t state) {
+        if (state == state::CASE) {
+            nesting_level += 1;
+            return CASE;
+        }
 
-    if (old == context::CASE && state == state::START) {
-        return context::NONE;
-    }
+        if (old == CASE && state == state::START) {
+            return NONE;
+        }
 
-    return old;
+        return old;
+    }
 }
 
 void to_lower(std::string& input) {
@@ -97,6 +109,8 @@ std::string next_token(std::string& input) {
     if (input.empty()) {
         return "";
     }
+
+    trim(input);
 
     static std::set<char> separators = {' ', ',', ':', ';'};
 
@@ -110,12 +124,14 @@ std::string next_token(std::string& input) {
             break;
         }
 
-        if (input[i] == ' ') {
-            continue;
+        if (input.size() > 1 && input.substr(0, 2) == ":=") {
+            i = 2;
+        } else {
+            i = 1;
         }
 
-        std::string res(input.c_str(), 1);
-        input = input.substr(1);
+        std::string res(input.c_str(), i);
+        input = input.substr(i);
         return res;
     }
 
@@ -145,27 +161,34 @@ void analyze(std::string input) {
     to_lower(input);
 
     state::with_context current = {state::START, lexem::UNKNOWN, context::NONE};
-    
-    std::string token;
-    while (token = next_token(input), token != "") {
-        trim(token);
 
+    std::string token;
+    while (true) {
+        token = next_token(input);
         current.lexem = identify_lexem(token);
         std::cout << "Got: " << lexem::to_string(current.lexem, token) << std::endl;
 
         auto next = state::table[current.state][current.lexem];
+        if (next == state::CASE_END) {
+            nesting_level -= 1;
+        }
 
-        current.ctx = update_context(current.ctx, next);
+        current.ctx = context::update(current.ctx, next);
         if (next == state::CONTEXT) {
-            next = contextual_table[current];
+            next = contextual_table[current]();
         }
 
         current.state = next;
         if (current.state == state::ERROR) {
-            std::cout << kError << std::endl;
+            std::cout << kError << std::endl << std::endl;
+            nesting_level = 0;
             return;
+        }
+
+        if (input == "" && current.state == state::START) {
+            break;
         }
     }
 
-    std::cout << kOk << std::endl;
+    std::cout << kOk << std::endl << std::endl;
 }

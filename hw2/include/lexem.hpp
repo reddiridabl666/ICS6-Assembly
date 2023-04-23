@@ -28,6 +28,10 @@ namespace lexem {
     }
 
     inline std::string to_string(lexem_t lexem, const std::string& token) {
+        if (token == "") {
+            return "nothing";
+        }
+
         if (lexem == ID) {
             return "identifier \"" + token + '"';
         }
